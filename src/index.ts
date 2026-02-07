@@ -19,6 +19,7 @@ const {
   HOST,
   SMTP_PORT,
   SMTP_SECURE,
+  ALLOW_ALIAS,
 } = Bun.env;
 
 if (!GMAIL_USER || !GMAIL_APP_PASSWORD) {
@@ -74,6 +75,11 @@ const host = HOST || "localhost";
 const defaultToEmail = TO_EMAIL || "";
 const fromDisplay = `${fromName} <${fromEmail}>`;
 const fromIsAlias = fromEmail.toLowerCase() !== GMAIL_USER.toLowerCase();
+const fromAliasError = fromIsAlias
+  ? "FROM_EMAIL berbeda dari GMAIL_USER. Verifikasi dulu di Gmail (Send mail as)."
+  : "";
+const allowAlias =
+  typeof ALLOW_ALIAS === "string" && ALLOW_ALIAS.toLowerCase() === "true";
 
 const html = `<!doctype html>
 <html lang="en">
@@ -291,7 +297,7 @@ const html = `<!doctype html>
             <strong>${defaultToEmail || "(not set)"}</strong>
           </div>
           <p class="note">
-            Pastikan akun Gmail memakai App Password. Gunakan dropdown untuk memilih SSL atau STARTTLS sesuai kebutuhan.
+            ${fromAliasError || "Gunakan App Password Gmail dan pilih mode SMTP sesuai kebutuhan."}
           </p>
         </div>
       </div>
@@ -391,6 +397,24 @@ Bun.serve({
       const selectedPort = selectedSecure ? 465 : 587;
 
       try {
+        if (fromIsAlias && !allowAlias) {
+          return new Response(
+            renderResult(
+              "Pengiriman dibatalkan",
+              "FROM_EMAIL berbeda dari GMAIL_USER.",
+              [
+                "Gmail biasanya menolak From yang belum diverifikasi.",
+                "Verifikasi dulu di Gmail (Send mail as), lalu coba lagi.",
+                "Atau set ALLOW_ALIAS=true jika sudah diverifikasi.",
+              ],
+              "error",
+            ),
+            {
+              status: 400,
+              headers: { "content-type": "text/html; charset=utf-8" },
+            },
+          );
+        }
         const messageId = await sendEmail(
           toEmail,
           subject,

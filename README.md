@@ -19,6 +19,7 @@ cp .env.example .env
 `GMAIL_APP_PASSWORD` should be a Google **App Password** (recommended). A normal account password typically won't work.
 
 `FROM_EMAIL` is optional. If not set, it defaults to `GMAIL_USER`.
+If you use a different `FROM_EMAIL`, set `ALLOW_ALIAS=true` **after** verifying the alias in Gmail (Send mail as).
 
 ## Run
 

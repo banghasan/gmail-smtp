@@ -1,4 +1,10 @@
 import nodemailer from "nodemailer";
+import {
+  normalizeEmail,
+  validateEmail,
+  validateSubject,
+  validateText,
+} from "./validation";
 
 const {
   GMAIL_USER,
@@ -403,9 +409,7 @@ Bun.serve({
       const text = String(formData.get("text") || defaultText).trim();
       const smtpMode = String(formData.get("smtpMode") || "ssl").toLowerCase();
       const rawToEmail = String(formData.get("toEmail") || defaultToEmail);
-      let toEmail = rawToEmail.trim();
-      toEmail = toEmail.replace(/^[\"']|[\"']$/g, "");
-      toEmail = toEmail.replace(/\s+/g, "");
+      const toEmail = normalizeEmail(rawToEmail);
 
       if (!toEmail) {
         return new Response(
@@ -421,7 +425,7 @@ Bun.serve({
           },
         );
       }
-      if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(toEmail)) {
+      if (!validateEmail(toEmail)) {
         const items = [
           `Format email tujuan tidak valid: "${toEmail}".`,
           "Contoh format yang benar: user@example.com",
@@ -446,7 +450,7 @@ Bun.serve({
           },
         );
       }
-      if (subject.length < 3 || subject.length > 120) {
+      if (!validateSubject(subject)) {
         return new Response(
           renderResult(
             "Validasi gagal",
@@ -460,7 +464,7 @@ Bun.serve({
           },
         );
       }
-      if (text.length < 5 || text.length > 2000) {
+      if (!validateText(text)) {
         return new Response(
           renderResult(
             "Validasi gagal",

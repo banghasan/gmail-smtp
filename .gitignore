@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Bun
+bun.lockb
+
+# Env
+.env
+
+# Logs
+*.log
+
+# OS
+.DS_Store

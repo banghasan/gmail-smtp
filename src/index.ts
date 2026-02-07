@@ -12,6 +12,7 @@ const {
   GMAIL_APP_PASSWORD,
   TO_EMAIL,
   FROM_NAME,
+  FROM_EMAIL,
   SUBJECT,
   TEXT,
   PORT,
@@ -31,6 +32,7 @@ const defaultSmtpSecure = SMTP_SECURE
   : defaultSmtpPort === 465;
 
 const fromName = FROM_NAME || "Bun SMTP Test";
+const fromEmail = FROM_EMAIL || GMAIL_USER;
 const defaultSubject = SUBJECT || "Bun SMTP Gmail test";
 const defaultText =
   TEXT || "Hello! This is a test email sent via Gmail SMTP using Bun.";
@@ -55,7 +57,7 @@ async function sendEmail(
   secure: boolean,
 ) {
   const message = {
-    from: `"${fromName}" <${GMAIL_USER}>`,
+    from: `"${fromName}" <${fromEmail}>`,
     to: toEmail,
     subject,
     text,
@@ -70,7 +72,8 @@ const port = Number(PORT || 5173);
 const host = HOST || "localhost";
 
 const defaultToEmail = TO_EMAIL || "";
-const fromDisplay = `${fromName} <${GMAIL_USER}>`;
+const fromDisplay = `${fromName} <${fromEmail}>`;
+const fromIsAlias = fromEmail.toLowerCase() !== GMAIL_USER.toLowerCase();
 
 const html = `<!doctype html>
 <html lang="en">
@@ -232,6 +235,11 @@ const html = `<!doctype html>
         <form class="card" method="POST" action="/send">
           <label>From</label>
           <input name="from" value="${fromDisplay}" disabled />
+          ${
+            fromIsAlias
+              ? `<p class="note">FROM_EMAIL berbeda dari GMAIL_USER. Pastikan alamat ini sudah diverifikasi di Gmail (Send mail as).</p>`
+              : `<p class="note">From mengikuti GMAIL_USER. Jika ingin alias, set FROM_EMAIL dan verifikasi di Gmail (Send mail as).</p>`
+          }
 
           <label>To</label>
           <input

@@ -18,6 +18,8 @@ cp .env.example .env
 
 `GMAIL_APP_PASSWORD` should be a Google **App Password** (recommended). A normal account password typically won't work.
 
+`FROM_EMAIL` is optional. If not set, it defaults to `GMAIL_USER`.
+
 ## Run
 
 ```bash
